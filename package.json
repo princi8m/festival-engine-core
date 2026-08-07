@@ -1,0 +1,26 @@
+{
+  "name": "festival-engine-core",
+  "version": "0.1.0",
+  "description": "Shared certificate/laurel generation engine for the festival-engine family of sites (bracciano_fest, bif, sicilian, mannheimweb, kiez). Distributed as a GitHub git-dependency, not an npm registry package.",
+  "license": "UNLICENSED",
+  "private": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.3",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

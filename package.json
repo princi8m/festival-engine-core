@@ -1,6 +1,6 @@
 {
   "name": "festival-engine-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Shared certificate/laurel generation engine for the festival-engine family of sites (bracciano_fest, bif, sicilian, mannheimweb, kiez). Distributed as a GitHub git-dependency, not an npm registry package.",
   "license": "UNLICENSED",
   "private": false,

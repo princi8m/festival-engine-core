@@ -1,15 +1,16 @@
 # festival-engine-core
 
-Shared certificate/laurel generation engine for the festival-engine family of sites
-(bracciano_fest, bif, sicilian, mannheimweb, kiez). Extracted so a fix to the text-fitting
-or rendering logic gets written once, instead of copy-pasted by hand across five
-repositories — the pattern that turned one bug into a multi-site outage on 2026-08-05.
+Shared engine for the festival-engine family of sites (bracciano_fest, bif, sicilian,
+mannheimweb, kiez): certificate/laurel generation, certificate email sending, and
+Instagram carousel publishing. Extracted so a fix gets written once, instead of
+copy-pasted by hand across five repositories — the pattern that turned one bug into a
+multi-site outage on 2026-08-05.
 
 This package is Next.js/Prisma-agnostic on purpose: it never touches the filesystem,
-a database, or Cloudinary. A consuming site resolves its own template bytes, loads its
-own font files, and reads its own per-field layout config — then calls into this package
-with all of that already assembled. Positions, colors, fonts, and which fields exist at
-all stay entirely site-side.
+a database, or Cloudinary. A consuming site resolves its own template bytes/credentials
+(font files, Gmail app password, Instagram access token, per-field layout config) — then
+calls into this package with all of that already assembled. Positions, colors, fonts,
+credentials, and which fields/features exist at all stay entirely site-side.
 
 ## Distribution — why `dist/` is committed
 
@@ -48,6 +49,12 @@ this distribution actually relies on.
 - `canvas.ts` (exported as the `canvas` namespace) — `@napi-rs/canvas`-backed laurel
   primitives. Only `anchor: "top"` fields are implemented today, for the same reason.
 - `types.ts` — `FieldLayout` (position/size), `FieldStyle` (color + fitting thresholds).
+- `email.ts` — `sendCertificateEmail`/`createGmailTransport`, Gmail SMTP with the
+  connection/greeting/socket timeouts that fixed the 2026-08-05 incident.
+- `instagram.ts` — Graph API carousel-publishing primitives (`createCarouselChildContainer`,
+  `createCarouselContainer`, `publishContainer`, `debugToken`). Requires Meta App Review
+  for `instagram_content_publish` before it works beyond the app's own testers — see the
+  module's own doc comment.
 
 Both anchor modes exist in the type system so a future site (e.g. a top-anchored
 certificate, matching sicilian/mannheimweb's current behavior) can add support without a

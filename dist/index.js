@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.canvas = exports.pdf = void 0;
 __exportStar(require("./types"), exports);
 __exportStar(require("./text-fit"), exports);
+__exportStar(require("./email"), exports);
 // Namespaced, not flat re-exports: pdf.ts and canvas.ts both expose
 // drawAdaptiveField/drawOverrideField for their own backend, which collide as a flat
 // barrel. A site's certificate.ts only ever needs the pdf namespace, laurel.ts only

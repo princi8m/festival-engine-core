@@ -60,11 +60,36 @@ function drawLinesCentered(
   }
 }
 
-function assertCenterAnchor(layout: FieldLayout, fn: string) {
-  if (layout.anchor !== "center") {
-    throw new Error(
-      `pdf.${fn}: anchor "${layout.anchor}" is not implemented yet — only "center" is supported today`,
-    );
+// Top-anchored: yFrac measured from the BOTTOM of the page (pdf-lib's native origin), as
+// the FIRST line's baseline; subsequent lines are drawn at decreasing y (visually
+// downward). Matches every certificate field on sites that use this anchor today
+// (sicilian, mannheimweb). Note this is a different yFrac convention than canvas.ts's
+// "top" anchor (which measures from the image's top edge, canvas's native origin) — each
+// backend's "top" anchor uses that backend's own native coordinate origin, chosen to
+// exactly reproduce each site's pre-existing hand-rolled positioning with no value
+// conversion, not to share one cross-backend yFrac meaning.
+function drawLinesTopAnchored(
+  page: PDFPage,
+  lines: string[],
+  width: number,
+  height: number,
+  yFrac: number,
+  size: number,
+  lineGapMult: number,
+  font: PDFFont,
+  color: ReturnType<typeof rgb>,
+) {
+  const lineGap = size * lineGapMult;
+  const yStart = height * yFrac;
+  for (let i = 0; i < lines.length; i++) {
+    const lw = font.widthOfTextAtSize(lines[i], size);
+    page.drawText(lines[i], { x: width / 2 - lw / 2, y: yStart - i * lineGap, size, font, color });
+  }
+}
+
+function assertSupportedAnchor(layout: FieldLayout, fn: string) {
+  if (layout.anchor !== "center" && layout.anchor !== "top") {
+    throw new Error(`pdf.${fn}: anchor "${layout.anchor}" is not implemented yet`);
   }
 }
 
@@ -76,7 +101,7 @@ export function drawAdaptiveField(
   font: PDFFont,
   sizeMultiplier = 1,
 ): void {
-  assertCenterAnchor(layout, "drawAdaptiveField");
+  assertSupportedAnchor(layout, "drawAdaptiveField");
   const { width, height } = handle;
   const clean = sanitizeText(text);
   const maxW = width * layout.maxWidthFrac;
@@ -94,7 +119,8 @@ export function drawAdaptiveField(
     maxBlockHeight: layout.maxBlockHeightFrac !== undefined ? height * layout.maxBlockHeightFrac : undefined,
   });
 
-  drawLinesCentered(handle.page, lines, width, height, layout.yFrac, size, lineGapMult, font, hexToRgb(style.color));
+  const draw = layout.anchor === "top" ? drawLinesTopAnchored : drawLinesCentered;
+  draw(handle.page, lines, width, height, layout.yFrac, size, lineGapMult, font, hexToRgb(style.color));
 }
 
 export function drawOverrideField(
@@ -105,7 +131,7 @@ export function drawOverrideField(
   font: PDFFont,
   sizeMultiplier = 1,
 ): void {
-  assertCenterAnchor(layout, "drawOverrideField");
+  assertSupportedAnchor(layout, "drawOverrideField");
   const { width, height } = handle;
   const clean = sanitizeText(text);
   const maxW = width * layout.maxWidthFrac;
@@ -119,7 +145,8 @@ export function drawOverrideField(
   // customizes the other.
   const { lines, size } = fitOverrideText(clean, measure, { maxW, fullSize });
 
-  drawLinesCentered(handle.page, lines, width, height, layout.yFrac, size, lineGapMult, font, hexToRgb(style.color));
+  const draw = layout.anchor === "top" ? drawLinesTopAnchored : drawLinesCentered;
+  draw(handle.page, lines, width, height, layout.yFrac, size, lineGapMult, font, hexToRgb(style.color));
 }
 
 export async function finalizePdf(

@@ -6,11 +6,14 @@
 // "top": yFrac is measured from the TOP of the image, and lines stack downward from it —
 //   matches how laurel fields are positioned today (canvas's textBaseline = "top").
 //
-// Only one anchor mode is actually implemented per format today (pdf.ts: "center",
-// canvas.ts: "top") — the other throws a clear "not implemented yet" error rather than
-// silently producing wrong output. The type itself stays open so a future site (e.g. a
-// top-anchored certificate, matching sicilian/mannheimweb's current behavior) can add
-// support without a breaking change to sites that don't need it.
+// pdf.ts supports both "center" and "top"; canvas.ts supports only "top" today (laurel
+// has never needed a centered field). Either backend throws a clear "not implemented yet"
+// error for an anchor it doesn't support, rather than silently producing wrong output.
+// Note "top" means something different per backend: pdf.ts's yFrac is still measured from
+// the page's native bottom-left origin (as the first line's baseline), while canvas.ts's
+// yFrac is measured from the image's top edge (canvas's native origin) — each backend
+// reproduces its consuming sites' pre-existing hand-rolled positioning exactly, rather
+// than sharing one cross-backend yFrac meaning.
 export interface FieldLayout {
   anchor: "center" | "top";
   yFrac: number;

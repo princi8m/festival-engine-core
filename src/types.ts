@@ -9,11 +9,10 @@
 // pdf.ts supports both "center" and "top"; canvas.ts supports only "top" today (laurel
 // has never needed a centered field). Either backend throws a clear "not implemented yet"
 // error for an anchor it doesn't support, rather than silently producing wrong output.
-// Note "top" means something different per backend: pdf.ts's yFrac is still measured from
-// the page's native bottom-left origin (as the first line's baseline), while canvas.ts's
-// yFrac is measured from the image's top edge (canvas's native origin) — each backend
-// reproduces its consuming sites' pre-existing hand-rolled positioning exactly, rather
-// than sharing one cross-backend yFrac meaning.
+// "top" means the same thing in both backends — yFrac is the first line's distance from
+// the TOP of the image, lines stacking downward — regardless of that backend's own native
+// coordinate origin (pdf-lib's is bottom-left; pdf.ts converts internally). This keeps the
+// admin drag-to-reposition editor (FieldPositionEditor.tsx) backend-agnostic.
 export interface FieldLayout {
   anchor: "center" | "top";
   yFrac: number;

@@ -60,14 +60,14 @@ function drawLinesCentered(
   }
 }
 
-// Top-anchored: yFrac measured from the BOTTOM of the page (pdf-lib's native origin), as
-// the FIRST line's baseline; subsequent lines are drawn at decreasing y (visually
-// downward). Matches every certificate field on sites that use this anchor today
-// (sicilian, mannheimweb). Note this is a different yFrac convention than canvas.ts's
-// "top" anchor (which measures from the image's top edge, canvas's native origin) — each
-// backend's "top" anchor uses that backend's own native coordinate origin, chosen to
-// exactly reproduce each site's pre-existing hand-rolled positioning with no value
-// conversion, not to share one cross-backend yFrac meaning.
+// Top-anchored: yFrac measured from the TOP of the page — same convention as canvas.ts's
+// "top" anchor, so the admin drag-to-reposition editor (FieldPositionEditor.tsx) needs no
+// backend-specific inversion logic. pdf-lib's own coordinate origin is bottom-left, so the
+// first line's baseline is computed as height * (1 - yFrac); subsequent lines are drawn at
+// decreasing native-y (visually downward, i.e. increasing distance from top), exactly
+// reproducing each site's pre-existing hand-rolled top-anchored positioning (sicilian,
+// mannheimweb) once their yFrac values are expressed as "distance from top" instead of
+// their old "distance from bottom".
 function drawLinesTopAnchored(
   page: PDFPage,
   lines: string[],
@@ -80,7 +80,7 @@ function drawLinesTopAnchored(
   color: ReturnType<typeof rgb>,
 ) {
   const lineGap = size * lineGapMult;
-  const yStart = height * yFrac;
+  const yStart = height * (1 - yFrac);
   for (let i = 0; i < lines.length; i++) {
     const lw = font.widthOfTextAtSize(lines[i], size);
     page.drawText(lines[i], { x: width / 2 - lw / 2, y: yStart - i * lineGap, size, font, color });
